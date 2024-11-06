@@ -1,129 +1,90 @@
-# React + Vite Project Template
+# 🦘 バウンドエディター
 
-このプロジェクトは、モダンなReactアプリケーション開発のためのテンプレートです。Vite、Tailwind CSS、Vitest、ESLint、Prettier、GitHub Actions、Huskyなどの最新のツールを組み合わせて、効率的な開発環境を提供します。
+文字が跳ねまくって収集がつかないテキストエディター
 
-## 機能
+## 📝 概要
 
-- ⚡️ **Vite** - 超高速なフロントエンド開発環境
-- ⚛️ **React** - UIコンポーネントライブラリ
-- 🎨 **Tailwind CSS** - ユーティリティファーストのCSSフレームワーク
-- ✅ **Vitest** - 高速なユニットテストフレームワーク
-- 📝 **ESLint** - コード品質チェック
-- ✨ **Prettier** - コードフォーマッター
-- 🔄 **GitHub Actions** - 継続的インテグレーション
-- 🐶 **Husky** - Gitフックを使用した自動チェック
+バウンドエディターは、入力した文字が物理演算で跳ね回るという、実用性を考えない純粋な「クソアプリ」として作られたテキストエディターです。
 
-## 必要条件
+![demo](https://placehold.jp/400x300.png)
 
-- Node.js 18.x以上
-- npm 7.x以上
+### 特徴
 
-## セットアップ
+- 入力した文字が物理演算で跳ね回る
+- 日本語入力（IME）完全対応
+- 文字種によって跳ね方が変化
+- 完全に使いづらい（仕様です）
+
+## 🚀 デモ
+
+[こちらで試せます](https://your-demo-url.com)
+
+## 🔧 技術スタック
+
+- React
+- TypeScript
+- Tailwind CSS
+
+## ⚙️ セットアップ
 
 ```bash
 # リポジトリのクローン
-git clone <repository-url>
-cd <project-name>
+git clone https://github.com/tmasuyama1114/bouncing-editor
 
 # 依存関係のインストール
+cd bouncing-editor
 npm install
 
 # 開発サーバーの起動
 npm run dev
 ```
 
-## 利用可能なスクリプト
+## 💡 使い方
 
-```bash
-# 開発サーバーの起動
-npm run dev
+1. テキストボックスに文字を入力
+2. 英数字は直接入力で跳ねる
+3. 日本語はIME確定時に跳ねる
 
-# プロダクションビルド
-npm run build
+## 🎮 操作方法
 
-# ビルドのプレビュー
-npm run preview
+- 英数字: 直接入力可能
+- 日本語: IMEで入力→確定で跳ねる
+- 文字サイズ: 文字種により自動で調整
 
-# テストの実行
-npm test
+## 🐛 既知の問題
 
-# テストカバレッジの確認
-npm run test:coverage
+- 大量の文字を入力すると重くなる
+- 文字が画面外に飛んでいくことがある
+- たまに文字が宇宙まで飛んでいく（仕様です）
 
-# リントチェック
-npm run lint
+## 📚 実装の詳細
 
-# コードフォーマット
-npm run format
-```
-
-## プロジェクト構造
+### コンポーネント構成
 
 ```
-.
-├── .github/
-│   └── workflows/    # GitHub Actions設定
-├── src/
-│   ├── components/   # Reactコンポーネント
-│   ├── test/        # テスト関連ファイル
-│   ├── App.tsx      # ルートコンポーネント
-│   └── main.tsx     # エントリーポイント
-├── .eslintrc.cjs    # ESLint設定
-├── .prettierrc      # Prettier設定
-├── vite.config.ts   # Vite設定
-└── tailwind.config.js # Tailwind CSS設定
+src/
+├── components/
+│   ├── BouncingEditor.tsx   # メインコンポーネント
+│   └── BouncingCharacter.tsx # 文字アニメーション用コンポーネント
+├── types/
+│   └── index.ts             # 型定義
+└── utils/
+    └── physics.ts           # 物理演算ユーティリティ
 ```
 
-## 開発フロー
+### 主要機能
 
-1. 新しい機能の開発を始める際は、新しいブランチを作成
-2. コードを変更
-3. 自動フォーマットとリントチェックが実行される（commit時）
-4. テストを実行
-5. PRを作成
-6. GitHub Actionsによる自動チェック
-7. レビュー後にマージ
+1. 物理演算システム
 
-## テスト
+   - 重力
+   - 跳ね返り
+   - 摩擦
 
-Vitestを使用してテストを記述します。例：
+2. 入力制御
+   - IME対応
+   - 文字種判定
+   - アニメーション制御
 
-```typescript
-// Button.test.tsx
-import { render, screen } from '@testing-library/react'
-import { Button } from './Button'
+## 📜 ライセンス
 
-test('renders button with correct text', () => {
-  render(<Button>Click me</Button>)
-  expect(screen.getByText('Click me')).toBeInTheDocument()
-})
-```
-
-## コード品質
-
-- ESLintとPrettierを使用してコードの品質とフォーマットを管理
-- Huskyとlint-stagedを使用して、コミット前に自動チェックを実行
-- GitHub Actionsで継続的インテグレーションを実行
-
-## GitHub Actions
-
-以下のチェックが自動で実行されます：
-
-- リントチェック
-- コードフォーマットチェック
-- テストの実行
-- ビルドの確認
-
-## スタイリング
-
-Tailwind CSSを使用してスタイリングを行います：
-
-```tsx
-function Button({ children }) {
-  return (
-    <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-      {children}
-    </button>
-  )
-}
-```
+[MIT License](LICENSE)
