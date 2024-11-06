@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Vector2D } from '../types'
 import { getCharacterParams } from '../utils/physics'
 
@@ -6,67 +6,100 @@ type Props = {
   char: string
 }
 
-const BouncingCharacter: React.FC<Props> = ({ char }) => {
-  const params = getCharacterParams(char)
-  const [position, setPosition] = useState<Vector2D>({ x: 0, y: 0 })
-  const [velocity, setVelocity] = useState<Vector2D>({
+const BouncingCharacter: React.FC<Props> = React.memo(({ char }) => {
+  // キャラクターのパラメータをメモ化
+  const params = useMemo(() => getCharacterParams(char), [char])
+
+  // ref を使用して DOM 更新を最適化
+  const positionRef = useRef<Vector2D>({ x: 0, y: 0 })
+  const velocityRef = useRef<Vector2D>({
     x: Math.random() * 2 - 1,
     y: params.initialVelocity,
   })
-  const [isStatic, setIsStatic] = useState(false)
 
-  useEffect(() => {
+  // レンダリングのトリガーとなる状態は必要最小限に
+  const [isStatic, setIsStatic] = useState(false)
+  const elementRef = useRef<HTMLSpanElement>(null)
+
+  // 物理演算の更新関数をメモ化
+  const updatePhysics = useCallback(() => {
     if (isStatic) return
 
+    const pos = positionRef.current
+    const vel = velocityRef.current
     const gravity = params.gravity
     const bounce = -0.7
     const friction = 0.99
 
-    const interval = setInterval(() => {
-      setPosition((pos) => {
-        const newX = pos.x + velocity.x
-        const newY = pos.y + velocity.y
+    const newX = pos.x + vel.x
+    const newY = pos.y + vel.y
 
-        if (newX < -100 || newX > 100) {
-          setVelocity((v) => ({ ...v, x: v.x * bounce }))
-        }
+    // 壁との衝突判定
+    if (newX < -100 || newX > 100) {
+      vel.x *= bounce
+    }
 
-        if (newY > 20) {
-          setVelocity((v) => ({
-            x: v.x * friction,
-            y: v.y * bounce,
-          }))
+    // 地面との衝突判定
+    if (newY > 20) {
+      vel.x *= friction
+      vel.y *= bounce
 
-          if (Math.abs(velocity.y) < 0.5) {
-            setIsStatic(true)
-          }
+      if (Math.abs(vel.y) < 0.5) {
+        setIsStatic(true)
+      }
 
-          return { x: newX, y: 20 }
-        }
+      positionRef.current = { x: newX, y: 20 }
+    } else {
+      vel.y += gravity
+      positionRef.current = { x: newX, y: newY }
+    }
 
-        setVelocity((v) => ({ x: v.x, y: v.y + gravity }))
+    // DOM の直接更新で再レンダリングを回避
+    if (elementRef.current) {
+      elementRef.current.style.transform = `translate(${newX}px, ${newY}px)`
+    }
+  }, [isStatic, params.gravity])
 
-        return { x: newX, y: newY }
-      })
-    }, 16)
+  useEffect(() => {
+    if (isStatic) return
 
-    return () => clearInterval(interval)
-  }, [velocity, isStatic, params.gravity])
+    let animationFrameId: number
+
+    const animate = () => {
+      updatePhysics()
+      animationFrameId = requestAnimationFrame(animate)
+    }
+
+    animationFrameId = requestAnimationFrame(animate)
+
+    return () => {
+      cancelAnimationFrame(animationFrameId)
+    }
+  }, [isStatic, updatePhysics])
+
+  // スタイルをメモ化
+  const style = useMemo(
+    () => ({
+      transform: `translate(0px, 0px)`,
+      textShadow: isStatic ? 'none' : '0 0 5px rgba(0,0,0,0.3)',
+      fontFamily: '"Hiragino Kaku Gothic ProN", "メイリオ", sans-serif',
+    }),
+    [isStatic]
+  )
 
   return (
     <span
+      ref={elementRef}
       className={`inline-block font-bold ${params.size} ${
         isStatic ? 'text-blue-600' : 'text-red-500'
       }`}
-      style={{
-        transform: `translate(${position.x}px, ${position.y}px)`,
-        textShadow: isStatic ? 'none' : '0 0 5px rgba(0,0,0,0.3)',
-        fontFamily: '"Hiragino Kaku Gothic ProN", "メイリオ", sans-serif',
-      }}
+      style={style}
     >
       {char}
     </span>
   )
-}
+})
+
+BouncingCharacter.displayName = 'BouncingCharacter'
 
 export default BouncingCharacter
