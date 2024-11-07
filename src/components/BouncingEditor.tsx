@@ -84,7 +84,7 @@ const BouncingEditor: React.FC = () => {
       <div className="space-y-4">
         <div className="text-center mb-4">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">
-            🦘 バウンドエディタ 🦘
+            🦘 Bouncing Editor 🦘
           </h2>
           <p className="text-gray-600">
             文字が跳ねまくって収集つかないエディタ
